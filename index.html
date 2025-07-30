@@ -2,15 +2,202 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-   <meta name="google-site-verification" content="KubUY1ds_mWQC-dvF-LqiTQqCNXX8nZLXrys7dl85Xg" />
+  <title>Your App Landing Page</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  <title>Patreyoart Developer Site</title>
+    html, body {
+      height: 100%;
+      font-family: 'Helvetica Neue', sans-serif;
+      background-color: black;
+      color: white;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    .background {
+      background: url('StickySiteBack.png') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .navbar {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      padding: 20px 40px;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 10;
+    }
+
+    .navbar button {
+      margin-left: 20px;
+      background-color: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+
+    .navbar button:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .tagline {
+      font-size: 48px;
+      font-weight: bold;
+      backdrop-filter: brightness(80%);
+      padding: 20px 40px;
+      border-radius: 10px;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .section {
+      padding: 60px 20px;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .about-section {
+      display: none;
+      background-color: #111;
+      border-radius: 10px;
+      padding: 40px;
+      margin-top: 20px;
+    }
+
+    .about-section video {
+      width: 100%;
+      max-height: 400px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+
+    .about-section p {
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    #contact {
+  display: none; /* Hide initially */
+  background-color: #111;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+    #contact h2 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    #contact a {
+      font-size: 20px;
+      color: #00ffff;
+      text-decoration: none;
+    }
+
+    #contact a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .tagline {
+        font-size: 32px;
+        padding: 20px;
+      }
+
+      .navbar {
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      .navbar button {
+        margin: 10px 0;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Welcome to Patreyoart Developer Site</h1>
-  <p>This site hosts app-ads.txt and verification files for AdMob and Google Play.</p>
+  <div class="background" id="home">
+    <div class="navbar">
+      <button onclick="scrollToSection('home')">HOME</button>
+      <button onclick="toggleAbout()">ABOUT US</button>
+      <button onclick="scrollToSection('contact')">CONTACT</button>
+	   <button onclick="window.open('https://play.google.com/store/apps/details?id=com.STICKY.stickywrite', '_blank')">STORE</button>
+    </div>
+    <div class="tagline">What will you write today?</div>
+
+    <div class="about-section" id="aboutSection">
+  <div class="video-container">
+    <iframe
+      width="100%"
+      height="400"
+      src="https://www.youtube.com/embed/gDtOszpDzzI?start=101"
+      title="YouTube video"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+  </div>
+  <p>
+    We are a forward-thinking team building an app that simplifies writing through cutting-edge technology and user-first design.
+	</br>
+	Stickywrite's node based design allows for a more modular style of writing, building up ideas piece by piece.
+  </p>
+</div>
+
+  <div id="contact">
+    <h2>Contact Us</h2>
+    <p>Have questions or feedback?</p>
+    <a href="mailto:patreyoart@gmail.com">patreyoart@gmail.com</a>
+  </div>
+
+  <script>
+    function toggleAbout() {
+    const about = document.getElementById('aboutSection');
+    const contact = document.getElementById('contact');
+
+    // Toggle about section
+    about.style.display = (about.style.display === 'block') ? 'none' : 'block';
+
+    // Always hide contact when toggling about
+    contact.style.display = 'none';
+  }
+
+  function scrollToSection(id) {
+    const contact = document.getElementById('contact');
+    const about = document.getElementById('aboutSection');
+    const section = document.getElementById(id);
+
+    if (id === 'contact') {
+      contact.style.display = 'block';
+      about.style.display = 'none'; // hide about when showing contact
+    } else {
+      contact.style.display = 'none';
+      about.style.display = 'none'; // hide about when navigating anywhere else (like home)
+    }
+
+    section.scrollIntoView({ behavior: 'smooth' });
+  }
+  </script>
 </body>
 </html>
-
-
