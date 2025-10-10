@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Your App Landing Page</title>
+  <title>Stickywrite - writing app for Android</title>
   <style>
     * {
       box-sizing: border-box;
@@ -133,6 +133,39 @@
       .navbar button {
         margin: 10px 0;
       }
+	  
+	  
+	  
+	  .social-links {
+  display: flex;
+  justify-content: center;
+  gap: 28px; /* slightly more space between icons */
+  margin-top: 50px; /* a bit more distance from text above */
+}
+
+.social-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;  /* increased from 50px */
+  height: 60px; /* increased from 50px */
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 26px; /* slightly larger icon */
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+  transform: scale(1.15);
+  background-color: rgba(0, 255, 255, 0.3);
+}
+	  
+	  
+	  
+	  
+	  
     }
   </style>
 </head>
@@ -165,16 +198,42 @@
   </p>
 </div>
 
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+/>
+
   <div id="contact">
-    <h2>Contact Us</h2>
-    <p>Have questions or feedback?</p>
-    <a href="mailto:patreyoart@gmail.com">patreyoart@gmail.com</a>
+  <h2>Contact Us</h2>
+  <p>Have questions or feedback?</p>
+  <a href="mailto:patreyoart@gmail.com">patreyoart@gmail.com</a>
+
+  <div class="social-links">
+    <a href="https://www.facebook.com/profile.php?id=61581813522208" target="_blank" aria-label="Facebook">
+      <i class="fab fa-facebook-f"></i>
+    </a>
+    <a href="https://x.com/StickywriteApp" target="_blank" aria-label="X (Twitter)">
+      <i class="fab fa-x-twitter"></i>
+    </a>
+    <a href="https://www.instagram.com/stickywriteapp/" target="_blank" aria-label="Instagram">
+      <i class="fab fa-instagram"></i>
+    </a>
+   
   </div>
+</div>
 
   <script>
     function toggleAbout() {
     const about = document.getElementById('aboutSection');
     const contact = document.getElementById('contact');
+
+// <a href="https://linkedin.com/in/YourProfile" target="_blank" aria-label="LinkedIn">
+     // <i class="fab fa-linkedin-in"></i>
+   // </a>
+
+
+
+
 
     // Toggle about section
     about.style.display = (about.style.display === 'block') ? 'none' : 'block';
