@@ -2,261 +2,357 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Stickywrite - writing app for Android</title>
+
+  <!-- Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
       height: 100%;
-      font-family: 'Helvetica Neue', sans-serif;
-      background-color: black;
-      color: white;
+      font-family: "Helvetica Neue", sans-serif;
+      background-color: #000;
+      color: #fff;
       scroll-behavior: smooth;
     }
 
-    body {
-      overflow-x: hidden;
-    }
+    body { overflow-x: hidden; }
 
     .background {
-      background: url('StickySiteBack.png') no-repeat center center fixed;
+      background: url("StickySiteBack.png") no-repeat center center fixed;
       background-size: cover;
-      height: 100vh;
+      min-height: 100vh;
       position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
+    }
+
+    /* subtle readability overlay */
+    .background::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: rgba(0,0,0,0.25);
+      pointer-events:none;
+      z-index:0;
     }
 
     .navbar {
-      position: absolute;
+      position: sticky;
       top: 0;
       width: 100%;
       display: flex;
       justify-content: flex-end;
-      padding: 20px 40px;
-      background-color: rgba(0, 0, 0, 0.6);
+      padding: 16px 24px;
+      background-color: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
       z-index: 10;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .navbar button {
-      margin-left: 20px;
-      background-color: rgba(255, 255, 255, 0.15);
-      border: none;
+      background-color: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255,255,255,0.10);
       color: white;
-      padding: 10px 20px;
-      font-size: 16px;
+      padding: 10px 16px;
+      font-size: 14px;
+      letter-spacing: 0.5px;
       cursor: pointer;
-      border-radius: 5px;
-      transition: background 0.3s ease;
+      border-radius: 10px;
+      transition: transform 0.15s ease, background 0.25s ease, border-color 0.25s ease;
     }
 
     .navbar button:hover {
-      background-color: rgba(255, 255, 255, 0.3);
+      background-color: rgba(255, 255, 255, 0.24);
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .navbar button:focus-visible {
+      outline: 2px solid rgba(0, 255, 255, 0.55);
+      outline-offset: 2px;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      width: min(980px, 92vw);
+      margin: 0 auto;
+      padding: 64px 0 72px;
+      text-align: center;
     }
 
     .tagline {
-      font-size: 48px;
-      font-weight: bold;
-      backdrop-filter: brightness(80%);
-      padding: 20px 40px;
-      border-radius: 10px;
-      background-color: rgba(0, 0, 0, 0.5);
+      display: inline-block;
+      font-size: clamp(30px, 4vw, 52px);
+      font-weight: 600;
+      padding: 18px 26px;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(8px) brightness(0.95);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
     }
 
-    .section {
-      padding: 60px 20px;
-      text-align: center;
-      max-width: 800px;
-      margin: 0 auto;
+    /* Shared panel style to match hero vibe */
+    .panel {
+      margin: 26px auto 0;
+      padding: 28px;
+      text-align: left;
+      background: rgba(0,0,0,0.62);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      backdrop-filter: blur(10px) brightness(1.0);
+      box-shadow: 0 10px 35px rgba(0,0,0,0.38);
     }
 
-    .about-section {
-      display: none;
-      background-color: #111;
-      border-radius: 10px;
-      padding: 40px;
-      margin-top: 20px;
+    .panel[hidden] { display: none; }
+
+    .panel h2 {
+      font-size: 28px;
+      margin-bottom: 14px;
+      letter-spacing: 0.2px;
     }
 
-    .about-section video {
-      width: 100%;
-      max-height: 400px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-    }
-
-    .about-section p {
+    .panel h3 {
       font-size: 18px;
-      line-height: 1.6;
+      margin: 18px 0 10px;
+      opacity: 0.95;
     }
 
-    #contact {
-  display: none; /* Hide initially */
-  background-color: #111;
-  padding: 60px 20px;
-  text-align: center;
-}
-
-    #contact h2 {
-      font-size: 32px;
-      margin-bottom: 20px;
+    .prose {
+      font-size: 17px;
+      line-height: 1.7;
+      opacity: 0.95;
     }
 
-    #contact a {
-      font-size: 20px;
+    .prose p { margin-top: 12px; }
+    .prose p:first-child { margin-top: 0; }
+
+    .prose ul {
+      margin: 10px 0 0 20px;
+    }
+    .prose li { margin: 8px 0; }
+
+    .cta {
+      margin-top: 16px;
+      font-weight: 700;
+    }
+
+    /* Responsive 16:9 embed */
+    .video-container {
+      position: relative;
+      width: 100%;
+      margin: 12px 0 18px;
+      padding-top: 56.25%;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.35);
+    }
+    .video-container iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /* Contact */
+    .email {
+      font-size: 18px;
       color: #00ffff;
       text-decoration: none;
+      word-break: break-word;
+    }
+    .email:hover { text-decoration: underline; }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 18px;
+      flex-wrap: wrap;
     }
 
-    #contact a:hover {
-      text-decoration: underline;
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: white;
+      font-size: 24px;
+      text-decoration: none;
+      transition: transform 0.2s ease, background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .social-links a:hover {
+      transform: scale(1.12);
+      background-color: rgba(0, 255, 255, 0.22);
+      border-color: rgba(0, 255, 255, 0.35);
+    }
+
+    .social-links a:focus-visible {
+      outline: 2px solid rgba(0, 255, 255, 0.55);
+      outline-offset: 3px;
     }
 
     @media (max-width: 600px) {
-      .tagline {
-        font-size: 32px;
+      .navbar {
+        justify-content: center;
+        padding: 14px 14px;
+      }
+      .nav-actions {
+        justify-content: center;
+      }
+      .panel {
         padding: 20px;
       }
-
-      .navbar {
-        flex-direction: column;
-        align-items: flex-end;
-      }
-
-      .navbar button {
-        margin: 10px 0;
-      }
-	  
-	  
-	  
-	  .social-links {
-  display: flex;
-  justify-content: center;
-  gap: 28px; /* slightly more space between icons */
-  margin-top: 50px; /* a bit more distance from text above */
-}
-
-.social-links a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 60px;  /* increased from 50px */
-  height: 60px; /* increased from 50px */
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
-  font-size: 26px; /* slightly larger icon */
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.social-links a:hover {
-  transform: scale(1.15);
-  background-color: rgba(0, 255, 255, 0.3);
-}
-	  
-	  
-	  
-	  
-	  
     }
   </style>
 </head>
+
 <body>
   <div class="background" id="home">
-    <div class="navbar">
-      <button onclick="scrollToSection('home')">HOME</button>
-      <button onclick="toggleAbout()">ABOUT US</button>
-      <button onclick="scrollToSection('contact')">CONTACT</button>
-	   <button onclick="window.open('https://play.google.com/store/apps/details?id=com.STICKY.stickywrite', '_blank')">STORE</button>
-    </div>
-    <div class="tagline">What will you write today?</div>
+    <header class="navbar">
+      <nav class="nav-actions" aria-label="Primary">
+        <button type="button" onclick="scrollToSection('home')">HOME</button>
+        <button type="button" id="aboutBtn" aria-expanded="false" onclick="toggleSection('about')">ABOUT US</button>
+        <button type="button" id="contactBtn" aria-expanded="false" onclick="toggleSection('contact')">CONTACT</button>
+        <button type="button" onclick="window.open('https://play.google.com/store/apps/details?id=com.STICKY.stickywrite', '_blank')">STORE</button>
+      </nav>
+    </header>
 
-    <div class="about-section" id="aboutSection">
-  <div class="video-container">
-    <iframe
-      width="100%"
-      height="400"
-      src="https://www.youtube.com/embed/gDtOszpDzzI?start=101"
-      title="YouTube video"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen>
-    </iframe>
+    <main class="content">
+      <h1 class="tagline">What will you write today?</h1>
+
+      <!-- ABOUT -->
+      <section class="panel" id="aboutSection" hidden aria-labelledby="aboutTitle">
+        <h2 id="aboutTitle">About Stickywrite</h2>
+
+        <div class="video-container">
+          <iframe
+            src="https://www.youtube.com/embed/gDtOszpDzzI?start=101"
+            title="Stickywrite video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+
+        <div class="prose">
+          <p>
+            We’re a forward-thinking team building a writing app that simplifies the process through user-first design.
+            Stickywrite’s node-based approach lets you build ideas piece by piece in a more modular way.
+          </p>
+
+          <p>
+            Stickywrite was created to solve a problem traditional writing tools don’t: not everyone wants to write inside
+            one giant document from start to finish. If you prefer working in chunks/scenes, beats, notes, character ideas.
+            Stickywrite is built for that.
+          </p>
+
+          <h3>What makes it different</h3>
+          <ul>
+            <li><strong>Modular writing:</strong> works like sticky notes, but easy to reorder and connect.</li>
+            <li><strong>Bookmarks:</strong> quickly jump to chapters, TODO spots, or gaps to fill.</li>
+            <li><strong>Works offline:</strong> ideal for commutes (yes, even on the London Underground).</li>
+            <li><strong>Free:</strong> with a small banner ad; remove it with a pocket change, one-time fee.</li>
+            <li><strong>Your files are yours:</strong> saved locally and easy to export, share, and keep private.</li>
+          </ul>
+
+          <h3>Why it “clicks” for some writers</h3>
+          <p>
+            A lot of apps are built to keep you scrolling. Stickywrite flips that: the same swipe-and-move feeling can be
+            used to move through your own story,notes, scenes, character sheets, and worldbuilding,without the doom-scroll.
+            Color-coding helps you instantly separate “Needs attention”, “Character”, “World”, or “Gap” notes.
+          </p>
+
+          <h3>From phone to desktop</h3>
+          <p>
+            Don’t want to write the final manuscript on your phone? No problem. Export your work to a <strong>.txt</strong>
+            file and drop it straight into your favorite word processor when you’re ready.
+          </p>
+
+          <p class="cta">So what are you waiting for? Get creating. Write something amazing!</p>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section class="panel" id="contact" hidden aria-labelledby="contactTitle">
+        <h2 id="contactTitle">Contact</h2>
+        <div class="prose">
+          <p>Have questions or feedback?</p>
+          <p><a class="email" href="mailto:patreyoart@gmail.com">patreyoart@gmail.com</a></p>
+        </div>
+
+        <div class="social-links" aria-label="Social links">
+          <a href="https://www.facebook.com/profile.php?id=61581813522208" target="_blank" rel="noreferrer" aria-label="Facebook">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="https://x.com/StickywriteApp" target="_blank" rel="noreferrer" aria-label="X (Twitter)">
+            <i class="fab fa-x-twitter"></i>
+          </a>
+          <a href="https://www.instagram.com/stickywriteapp/" target="_blank" rel="noreferrer" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
+        </div>
+      </section>
+    </main>
   </div>
-  <p>
-    We are a forward-thinking team building an app that simplifies writing through cutting-edge technology and user-first design.
-	</br>
-	Stickywrite's node based design allows for a more modular style of writing, building up ideas piece by piece.
-  </p>
-</div>
-
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-/>
-
-  <div id="contact">
-  <h2>Contact Us</h2>
-  <p>Have questions or feedback?</p>
-  <a href="mailto:patreyoart@gmail.com">patreyoart@gmail.com</a>
-
-  <div class="social-links">
-    <a href="https://www.facebook.com/profile.php?id=61581813522208" target="_blank" aria-label="Facebook">
-      <i class="fab fa-facebook-f"></i>
-    </a>
-    <a href="https://x.com/StickywriteApp" target="_blank" aria-label="X (Twitter)">
-      <i class="fab fa-x-twitter"></i>
-    </a>
-    <a href="https://www.instagram.com/stickywriteapp/" target="_blank" aria-label="Instagram">
-      <i class="fab fa-instagram"></i>
-    </a>
-   
-  </div>
-</div>
 
   <script>
-    function toggleAbout() {
-    const about = document.getElementById('aboutSection');
-    const contact = document.getElementById('contact');
+    const about = document.getElementById("aboutSection");
+    const contact = document.getElementById("contact");
+    const aboutBtn = document.getElementById("aboutBtn");
+    const contactBtn = document.getElementById("contactBtn");
 
-// <a href="https://linkedin.com/in/YourProfile" target="_blank" aria-label="LinkedIn">
-     // <i class="fab fa-linkedin-in"></i>
-   // </a>
-
-
-
-
-
-    // Toggle about section
-    about.style.display = (about.style.display === 'block') ? 'none' : 'block';
-
-    // Always hide contact when toggling about
-    contact.style.display = 'none';
-  }
-
-  function scrollToSection(id) {
-    const contact = document.getElementById('contact');
-    const about = document.getElementById('aboutSection');
-    const section = document.getElementById(id);
-
-    if (id === 'contact') {
-      contact.style.display = 'block';
-      about.style.display = 'none'; // hide about when showing contact
-    } else {
-      contact.style.display = 'none';
-      about.style.display = 'none'; // hide about when navigating anywhere else (like home)
+    function hideAll() {
+      about.hidden = true;
+      contact.hidden = true;
+      aboutBtn?.setAttribute("aria-expanded", "false");
+      contactBtn?.setAttribute("aria-expanded", "false");
     }
 
-    section.scrollIntoView({ behavior: 'smooth' });
-  }
+    function toggleSection(which) {
+      const section = which === "about" ? about : contact;
+      const btn = which === "about" ? aboutBtn : contactBtn;
+
+      const isOpen = !section.hidden;
+      hideAll();
+
+      if (!isOpen) {
+        section.hidden = false;
+        btn?.setAttribute("aria-expanded", "true");
+
+        // ensure scrolling works even when the section was hidden
+        requestAnimationFrame(() => {
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      } else {
+        // if closing, return to top/hero area
+        scrollToSection("home");
+      }
+    }
+
+    function scrollToSection(id) {
+      if (id === "home") hideAll();
+      document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+    }
   </script>
 </body>
 </html>
