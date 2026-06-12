@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>31-Day Calendar Notes</title>
+  <style>
+    :root {
+      --bg-color: #f4f5f7;
+      --card-bg: #ffffff;
+      --text-main: #333;
+      --accent: #4a90e2;
+      --accent-hover: #357abd;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --border-color: #ccc;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #ddd;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    header h1 { margin: 0; }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    button:hover { background-color: var(--accent-hover); }
+    button.success { background-color: var(--success); }
+    button.success:hover { background-color: #219150; }
+    button.danger { background-color: var(--danger); padding: 4px 8px; font-size: 0.8rem;}
+    button.danger:hover { background-color: #c0392b; }
+    button.icon-btn { padding: 4px 8px; background: #eee; color: #333; font-size: 0.9rem; }
+    button.icon-btn:hover { background: #ddd; }
+
+    input[type="file"] { font-size: 0.9rem; max-width: 200px; }
+
+    /* View Tabs */
+    .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+    
+    .tab-btn {
+      background: transparent;
+      color: #666;
+      border: 2px solid transparent;
+      padding: 8px 16px;
+      font-size: 1rem;
+    }
+    
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      border-radius: 6px;
+    }
+
+    .view-container {
+      flex: 1;
+      overflow-y: auto;
+      background: #eaeaea;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    /* List View Styles */
+    #list-view {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .list-card {
+      background: var(--card-bg);
+      border-left: 6px solid var(--accent);
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      transition: opacity 0.2s;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .note-entry {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid #eee;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .note-entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    
+    .note-entry-header-label {
+      font-size: 0.85rem;
+      color: #777;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    input.title-input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      font-family: inherit;
+      font-weight: bold;
+      font-size: 1.05rem;
+    }
+
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      font-family: inherit;
+      min-height: 80px;
+      resize: none; 
+      overflow-y: hidden;
+    }
+
+    /* Grid View Styles */
+    #grid-view {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      background: transparent;
+      padding: 0;
+    }
+
+    .grid-day {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      min-height: 120px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.1s, box-shadow 0.1s, opacity 0.2s;
+    }
+
+    .grid-day:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border-color: var(--accent);
+    }
+
+    .grid-day-number {
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: var(--accent);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .note-count-badge {
+      background: #eee;
+      color: #555;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    .grid-day-preview {
+      font-size: 0.85rem;
+      color: #555;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .preview-bullet {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: bold;
+      padding: 4px 6px;
+      border-radius: 4px;
+      cursor: grab;
+      border: 1px solid transparent;
+      transition: background 0.2s, color 0.2s;
+    }
+    
+    .preview-bullet:hover {
+      background-color: #e3effd;
+      color: var(--accent);
+    }
+    
+    .preview-bullet:active {
+      cursor: grabbing;
+    }
+
+    /* Focus Mode Styles */
+    #focus-view {
+      flex: 1;
+      background: #fff;
+      border-radius: 8px;
+      padding: 30px;
+      overflow-y: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #focus-content-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .hidden { display: none !important; }
+
+    /* --- Drag and Drop Utilities --- */
+    .drag-handle {
+      cursor: grab;
+      padding: 0 8px;
+      color: #aaa;
+      font-size: 1.2rem;
+      user-select: none;
+      transition: color 0.2s;
+    }
+    .drag-handle:hover { color: var(--accent); }
+    .drag-handle:active { cursor: grabbing; }
+    
+    .dragging { opacity: 0.4; }
+    .drag-over { 
+      border: 2px dashed var(--accent) !important; 
+      background-color: #f0f7ff !important;
+    }
+
+    /* Print Styles */
+    @media print {
+      body { background: white; padding: 0; height: auto; }
+      header, .tabs, #list-view, #focus-view { display: none !important; }
+      .view-container { padding: 0; background: white; overflow: visible; }
+      #grid-view { display: grid !important; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+      .grid-day { border: 1px solid #000; break-inside: avoid; min-height: 100px; }
+      .grid-day-preview { color: #000; }
+      .preview-bullet { padding: 0; border: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <button id="home-btn" class="hidden success" onclick="closeFocusView()">⬅️ Back to Calendar</button>
+      <h1>31-Day Calendar Notes</h1>
+    </div>
+    
+    <div class="header-controls">
+      <input type="file" id="load-json" accept=".json" onchange="loadJSON(event)" title="Load JSON Notes">
+      <button onclick="saveJSON()">💾 Save JSON</button>
+      <button style="background: #8e44ad;" onclick="exportTXT()">📄 Export to TXT</button>
+      <button class="success" onclick="window.print()">🖨️ Print Grid</button>
+    </div>
+  </header>
+
+  <div class="tabs" id="main-tabs">
+    <button id="tab-list" class="tab-btn active" onclick="switchView('list')">List View</button>
+    <button id="tab-grid" class="tab-btn" onclick="switchView('grid')">Grid View</button>
+  </div>
+
+  <div class="view-container">
+    <div id="list-view"></div>
+    <div id="grid-view" class="hidden"></div>
+    <div id="focus-view" class="hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+        <h2 id="focus-title" style="margin: 0;">Day X</h2>
+        <button class="success" onclick="addNoteToFocusDay()">➕ Add Note to this Day</button>
+      </div>
+      <div id="focus-content-container"></div>
+    </div>
+  </div>
+
+  <a id="download-anchor" style="display:none"></a>
+
+  <script>
+    // App State
+    let calendarDays = Array.from({ length: 31 }, (_, i) => ({
+      day: i + 1,
+      notes: [] 
+    }));
+
+    let currentFocusDay = null;
+    let currentView = 'list';
+
+    // Drag State
+    let draggedType = null; // 'day' or 'note'
+    let draggedDayIndex = null;
+    let draggedNoteId = null;
+
+    // --- DRAG & DROP LOGIC ---
+    function handleDragStart(e, type, dayIndex, noteId = null) {
+      e.stopPropagation(); // STOPS EVENT BUBBLING: Prevents note drag from triggering day drag
+      
+      draggedType = type;
+      draggedDayIndex = dayIndex;
+      draggedNoteId = noteId;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => e.target.classList.add('dragging'), 0);
+    }
+
+    function handleDragEnd(e) {
+      e.stopPropagation(); // STOPS EVENT BUBBLING
+      
+      e.target.classList.remove('dragging');
+      e.target.setAttribute('draggable', false);
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      draggedType = null;
+      draggedDayIndex = null;
+      draggedNoteId = null;
+    }
+
+    function allowDrop(e) { e.preventDefault(); }
+
+    function handleDragEnter(e) {
+      e.preventDefault();
+      // Added .preview-bullet as a valid drop target
+      const dropTarget = e.target.closest('.list-card, .grid-day, .note-entry, .preview-bullet');
+      if (dropTarget && dropTarget !== document.querySelector('.dragging')) {
+        dropTarget.classList.add('drag-over');
+      }
+    }
+
+    function handleDragLeave(e) {
+      const dropTarget = e.target.closest('.list-card, .grid-day, .note-entry, .preview-bullet');
+      if (dropTarget) dropTarget.classList.remove('drag-over');
+    }
+
+    function handleDrop(e, targetDayIndex, targetNoteId = null) {
+      e.preventDefault();
+      e.stopPropagation(); // Stop event from bubbling up
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+
+      if (draggedType === 'day' && draggedDayIndex !== null && draggedDayIndex !== targetDayIndex) {
+        // Reorder Days
+        const movedDay = calendarDays.splice(draggedDayIndex, 1)[0];
+        calendarDays.splice(targetDayIndex, 0, movedDay);
+        // Renumber days to maintain sequence 1-31
+        calendarDays.forEach((d, idx) => d.day = idx + 1);
+        renderViews();
+      } 
+      else if (draggedType === 'note' && draggedDayIndex !== null && draggedNoteId !== null) {
+        // Move/Reorder Note
+        const sourceDay = calendarDays[draggedDayIndex];
+        const targetDay = calendarDays[targetDayIndex];
+        const noteIndex = sourceDay.notes.findIndex(n => n.id === draggedNoteId);
+        
+        if (noteIndex > -1) {
+          const movedNote = sourceDay.notes.splice(noteIndex, 1)[0];
+          
+          if (targetNoteId) {
+            // Insert before the specific target note
+            const targetNoteIndex = targetDay.notes.findIndex(n => n.id === targetNoteId);
+            targetDay.notes.splice(targetNoteIndex, 0, movedNote);
+          } else {
+            // Append to the target day
+            targetDay.notes.push(movedNote);
+          }
+
+          if (currentFocusDay !== null) renderFocusView();
+          else renderViews();
+        }
+      }
+    }
+
+
+    // --- DATA MUTATION ---
+    function addNoteToDay(dayIndex) {
+      calendarDays[dayIndex].notes.push({
+        id: "note_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+        title: "",
+        details: "",
+        isExpanded: false 
+      });
+      renderViews();
+    }
+
+    function addNoteToFocusDay() {
+      if (currentFocusDay !== null) {
+        addNoteToDay(currentFocusDay - 1);
+        renderFocusView(); 
+      }
+    }
+
+    function updateNoteField(dayIndex, noteId, field, value) {
+      const dayData = calendarDays[dayIndex];
+      const note = dayData.notes.find(n => n.id === noteId);
+      if (note) note[field] = value;
+    }
+
+    function toggleExpand(dayIndex, noteId) {
+      const note = calendarDays[dayIndex].notes.find(n => n.id === noteId);
+      if (note) {
+        note.isExpanded = !note.isExpanded;
+        if (currentFocusDay !== null) renderFocusView();
+        else renderListView();
+      }
+    }
+
+    function deleteNote(dayIndex, noteId) {
+      if (confirm("Delete this entry?")) {
+        calendarDays[dayIndex].notes = calendarDays[dayIndex].notes.filter(n => n.id !== noteId);
+        if (currentFocusDay !== null) renderFocusView();
+        else renderViews();
+      }
+    }
+
+    // --- INDIVIDUAL NOTE PRINTING ---
+    function printNote(dayIndex, noteId) {
+      const dayData = calendarDays[dayIndex];
+      const note = dayData.notes.find(n => n.id === noteId);
+      if (!note) return;
+
+      const printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Print Note - Day ${dayData.day}</title>
+            <style>
+              body { 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                padding: 40px; 
+                color: #333; 
+                line-height: 1.6; 
+              }
+              .meta { 
+                color: #777; 
+                font-weight: bold; 
+                text-transform: uppercase; 
+                font-size: 0.85rem; 
+                margin-bottom: 5px;
+              }
+              h1 { 
+                margin-top: 0; 
+                border-bottom: 2px solid #eee; 
+                padding-bottom: 10px; 
+                margin-bottom: 20px; 
+                font-size: 1.8rem;
+              }
+              .details { 
+                white-space: pre-wrap; /* Preserves line breaks from textarea */
+                font-size: 1.1rem; 
+              }
+            </style>
+          </head>
+          <body>
+            <div class="meta">Day ${dayData.day} Calendar Entry</div>
+            <h1>${note.title || 'Untitled Entry'}</h1>
+            <div class="details">${note.details || 'No details provided.'}</div>
+            <script>
+              window.onload = function() { 
+                window.print(); 
+                window.close(); 
+              }
+            <\/script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+
+    // --- UI HELPERS ---
+    function autoResize(textarea) {
+      textarea.style.height = '60px'; 
+      textarea.style.height = (textarea.scrollHeight + 2) + 'px'; 
+    }
+
+    function resizeAllTextareas() {
+      setTimeout(() => {
+        document.querySelectorAll('textarea:not(.hidden)').forEach(tx => autoResize(tx));
+      }, 0);
+    }
+
+    // --- RENDERING ---
+    function renderViews() {
+      if (currentView === 'list') renderListView();
+      if (currentView === 'grid') renderGridView();
+    }
+
+    function renderListView() {
+      const container = document.getElementById('list-view');
+      container.innerHTML = ''; 
+
+      calendarDays.forEach((dayData, index) => {
+        const card = document.createElement('div');
+        card.className = 'list-card';
+        card.id = `list_card_${index}`;
+        
+        // Setup Drag & Drop for the Day Card
+        card.ondragover = allowDrop;
+        card.ondragenter = handleDragEnter;
+        card.ondragleave = handleDragLeave;
+        card.ondrop = (e) => handleDrop(e, index);
+        card.ondragstart = (e) => handleDragStart(e, 'day', index);
+        card.ondragend = handleDragEnd;
+
+        let html = `
+          <div class="card-header">
+            <div style="display: flex; align-items: center;">
+              <span class="drag-handle" title="Drag to reorder day"
+                    onmousedown="document.getElementById('list_card_${index}').setAttribute('draggable', true)"
+                    onmouseup="document.getElementById('list_card_${index}').setAttribute('draggable', false)"
+                    onmouseleave="document.getElementById('list_card_${index}').setAttribute('draggable', false)">
+                ⣿
+              </span>
+              <span>Day ${dayData.day}</span>
+            </div>
+            <div>
+              <button class="icon-btn" onclick="addNoteToDay(${index})">➕ Add Note</button>
+            </div>
+          </div>
+          <div class="notes-container">
+        `;
+
+        if (dayData.notes.length === 0) {
+          html += `<p style="color: #999; font-style: italic; font-size: 0.9rem; margin: 0; padding-left: 30px;">No entries yet. Drop notes here.</p>`;
+        } else {
+          dayData.notes.forEach(note => {
+            html += `
+              <div class="note-entry" id="${note.id}"
+                   ondragover="allowDrop(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)"
+                   ondrop="handleDrop(event, ${index}, '${note.id}')"
+                   ondragstart="handleDragStart(event, 'note', ${index}, '${note.id}')"
+                   ondragend="handleDragEnd(event)">
+                
+                <div class="note-entry-header">
+                  <div style="display: flex; align-items: center;">
+                    <span class="drag-handle" title="Drag to move note"
+                          onmousedown="document.getElementById('${note.id}').setAttribute('draggable', true)"
+                          onmouseup="document.getElementById('${note.id}').setAttribute('draggable', false)"
+                          onmouseleave="document.getElementById('${note.id}').setAttribute('draggable', false)">
+                      ⣿
+                    </span>
+                    <span class="note-entry-header-label">Calendar Entry</span>
+                  </div>
+                  <div style="display: flex; gap: 8px;">
+                    <button class="icon-btn" onclick="printNote(${index}, '${note.id}')" title="Print Note">🖨️</button>
+                    <button class="danger" onclick="deleteNote(${index}, '${note.id}')">Delete</button>
+                  </div>
+                </div>
+                
+                <input class="title-input" type="text" placeholder="Entry Title (Appears in Calendar)..." value="${note.title || ''}" oninput="updateNoteField(${index}, '${note.id}', 'title', this.value)">
+                
+                <div style="margin-top: 5px;">
+                  <button class="icon-btn" onclick="toggleExpand(${index}, '${note.id}')">
+                    ${note.isExpanded ? '🔼 Collapse Details' : '🔽 Expand Details'}
+                  </button>
+                </div>
+
+                <textarea 
+                  class="${note.isExpanded ? '' : 'hidden'}" 
+                  style="margin-top: 8px;"
+                  placeholder="Extra Info / Details (Recipes, notes, etc)..." 
+                  oninput="updateNoteField(${index}, '${note.id}', 'details', this.value); autoResize(this)"
+                >${note.details || ''}</textarea>
+              </div>
+            `;
+          });
+        }
+
+        html += `</div>`;
+        card.innerHTML = html;
+        container.appendChild(card);
+      });
+
+      resizeAllTextareas();
+    }
+
+    function renderGridView() {
+      const container = document.getElementById('grid-view');
+      container.innerHTML = ''; 
+
+      calendarDays.forEach((dayData, index) => {
+        const dayBox = document.createElement('div');
+        dayBox.className = 'grid-day';
+        
+        // Make the entire grid box draggable for reordering
+        dayBox.draggable = true;
+        dayBox.ondragstart = (e) => handleDragStart(e, 'day', index);
+        dayBox.ondragend = handleDragEnd;
+        dayBox.ondragover = allowDrop;
+        dayBox.ondragenter = handleDragEnter;
+        dayBox.ondragleave = handleDragLeave;
+        dayBox.ondrop = (e) => handleDrop(e, index);
+
+        // Standard click opens focus view
+        dayBox.onclick = () => openFocusView(dayData.day);
+        
+        let previewHtml = '';
+        if (dayData.notes.length === 0) {
+          previewHtml = '<span style="color:#aaa; font-style:italic; padding: 4px;">Empty</span>';
+        } else {
+          dayData.notes.slice(0, 4).forEach(note => {
+            const displayTitle = (note.title || "").trim() || "Untitled Entry";
+            
+            // INDIVIDUAL NOTES NOW SUPPORT DRAG, DROP AND DRAG-OVER
+            previewHtml += `
+              <div class="preview-bullet"
+                   draggable="true"
+                   ondragover="allowDrop(event)"
+                   ondragenter="handleDragEnter(event)"
+                   ondragleave="handleDragLeave(event)"
+                   ondrop="handleDrop(event, ${index}, '${note.id}')"
+                   ondragstart="handleDragStart(event, 'note', ${index}, '${note.id}')"
+                   ondragend="handleDragEnd(event)"
+                   title="Drag to move this note">
+                • ${displayTitle}
+              </div>`;
+          });
+          if (dayData.notes.length > 4) {
+            previewHtml += `<div class="preview-bullet" style="color: #888;">+ ${dayData.notes.length - 4} more...</div>`;
+          }
+        }
+
+        dayBox.innerHTML = `
+          <div class="grid-day-number">
+            Day ${dayData.day}
+            ${dayData.notes.length > 0 ? `<span class="note-count-badge">${dayData.notes.length}</span>` : ''}
+          </div>
+          <div class="grid-day-preview">${previewHtml}</div>
+        `;
+        container.appendChild(dayBox);
+      });
+    }
+
+    function renderFocusView() {
+      if (currentFocusDay === null) return;
+      const dayIndex = currentFocusDay - 1;
+      const dayData = calendarDays[dayIndex];
+      const container = document.getElementById('focus-content-container');
+      
+      container.innerHTML = '';
+
+      if (dayData.notes.length === 0) {
+        container.innerHTML = `<p style="color: #999; font-style: italic;">No entries for Day ${dayData.day}. Click "Add Note" above to start.</p>`;
+      } else {
+        dayData.notes.forEach(note => {
+          const entryDiv = document.createElement('div');
+          entryDiv.className = 'note-entry';
+          entryDiv.id = `focus_note_${note.id}`;
+          
+          // Note Drag & Drop within Focus View
+          entryDiv.ondragover = allowDrop;
+          entryDiv.ondragenter = handleDragEnter;
+          entryDiv.ondragleave = handleDragLeave;
+          entryDiv.ondrop = (e) => handleDrop(e, dayIndex, note.id);
+          entryDiv.ondragstart = (e) => handleDragStart(e, 'note', dayIndex, note.id);
+          entryDiv.ondragend = handleDragEnd;
+
+          entryDiv.innerHTML = `
+            <div class="note-entry-header">
+              <div style="display: flex; align-items: center;">
+                <span class="drag-handle" title="Drag to reorder"
+                      onmousedown="document.getElementById('focus_note_${note.id}').setAttribute('draggable', true)"
+                      onmouseup="document.getElementById('focus_note_${note.id}').setAttribute('draggable', false)"
+                      onmouseleave="document.getElementById('focus_note_${note.id}').setAttribute('draggable', false)">
+                  ⣿
+                </span>
+                <span class="note-entry-header-label">Calendar Entry</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="icon-btn" onclick="printNote(${dayIndex}, '${note.id}')" title="Print Note">🖨️</button>
+                <button class="danger" onclick="deleteNote(${dayIndex}, '${note.id}')">Delete Entry</button>
+              </div>
+            </div>
+
+            <input class="title-input" type="text" placeholder="Entry Title (Appears in Calendar)..." value="${note.title || ''}" oninput="updateNoteField(${dayIndex}, '${note.id}', 'title', this.value)">
+            
+            <div style="margin-top: 5px;">
+              <button class="icon-btn" onclick="toggleExpand(${dayIndex}, '${note.id}')">
+                ${note.isExpanded ? '🔼 Collapse Details' : '🔽 Expand Details'}
+              </button>
+            </div>
+
+            <textarea 
+              class="${note.isExpanded ? '' : 'hidden'}" 
+              style="margin-top: 8px;"
+              placeholder="Extra Info / Details (Recipes, notes, etc)..." 
+              oninput="updateNoteField(${dayIndex}, '${note.id}', 'details', this.value); autoResize(this)"
+            >${note.details || ''}</textarea>
+          `;
+          container.appendChild(entryDiv);
+        });
+      }
+
+      resizeAllTextareas();
+    }
+
+    // --- NAVIGATION / VIEWS ---
+    function switchView(view) {
+      currentView = view;
+      document.getElementById('tab-list').classList.remove('active');
+      document.getElementById('tab-grid').classList.remove('active');
+      
+      document.getElementById('list-view').classList.add('hidden');
+      document.getElementById('grid-view').classList.add('hidden');
+      document.getElementById('focus-view').classList.add('hidden');
+      document.getElementById('main-tabs').classList.remove('hidden');
+      document.getElementById('home-btn').classList.add('hidden');
+
+      if (view === 'list') {
+        document.getElementById('tab-list').classList.add('active');
+        document.getElementById('list-view').classList.remove('hidden');
+        renderListView(); 
+      } else if (view === 'grid') {
+        document.getElementById('tab-grid').classList.add('active');
+        document.getElementById('grid-view').classList.remove('hidden');
+        renderGridView();
+      }
+    }
+
+    function openFocusView(dayNumber) {
+      currentFocusDay = dayNumber;
+      
+      document.getElementById('list-view').classList.add('hidden');
+      document.getElementById('grid-view').classList.add('hidden');
+      document.getElementById('main-tabs').classList.add('hidden');
+      
+      document.getElementById('focus-view').classList.remove('hidden');
+      document.getElementById('home-btn').classList.remove('hidden');
+
+      document.getElementById('focus-title').innerText = `Day ${dayNumber} - Expanded Notes`;
+      renderFocusView();
+    }
+
+    function closeFocusView() {
+      currentFocusDay = null;
+      switchView(currentView);
+    }
+
+    // --- FILE I/O ---
+    function loadJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const loadedData = JSON.parse(e.target.result);
+          
+          if (Array.isArray(loadedData)) {
+            if (loadedData.length === 31 && loadedData[0].hasOwnProperty('day')) {
+              calendarDays = loadedData.map(d => ({
+                day: d.day,
+                notes: d.notes ? d.notes.map(n => ({
+                  id: n.id,
+                  title: n.title !== undefined ? n.title : n.text || "",
+                  details: n.details !== undefined ? n.details : "",
+                  isExpanded: n.isExpanded || false
+                })) : []
+              }));
+              renderViews();
+              alert("Calendar JSON loaded successfully!");
+            } else {
+              alert("Data format is different. Attempting to adapt data into Day 1...");
+              calendarDays[0].notes = loadedData.map((item, idx) => ({
+                 id: "imported_" + Date.now() + "_" + idx,
+                 title: typeof item === 'string' ? item : "Imported Item",
+                 details: typeof item === 'string' ? "" : JSON.stringify(item),
+                 isExpanded: false
+              }));
+              renderViews();
+            }
+          } else {
+            alert("Invalid format. Please load a valid array JSON file.");
+          }
+        } catch (err) {
+          alert("Error parsing JSON file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function saveJSON() {
+      let filename = prompt("Enter a file name for your save:", "31_day_calendar");
+      if (!filename) return; 
+      if (!filename.toLowerCase().endsWith(".json")) filename += ".json";
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(calendarDays, null, 2));
+      triggerDownload(dataStr, filename);
+    }
+
+    function exportTXT() {
+      let filename = prompt("Enter a file name for your text export:", "calendar_export");
+      if (!filename) return; 
+      if (!filename.toLowerCase().endsWith(".txt")) filename += ".txt";
+
+      let outputText = "=== 31 DAY CALENDAR EXPORT ===\n\n";
+
+      calendarDays.forEach(dayData => {
+        if (dayData.notes.length > 0) {
+          outputText += `--- Day ${dayData.day} ---\n`;
+          dayData.notes.forEach((note, idx) => {
+            const hasTitle = (note.title || "").trim() !== "";
+            const hasDetails = (note.details || "").trim() !== "";
+            
+            if (hasTitle || hasDetails) {
+              outputText += `[Entry ${idx + 1}]: ${note.title || 'Untitled'}\n`;
+              if (hasDetails) {
+                outputText += `Details:\n${note.details}\n`;
+              }
+              outputText += `\n`;
+            }
+          });
+        }
+      });
+
+      const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(outputText);
+      triggerDownload(dataStr, filename);
+    }
+
+    function triggerDownload(dataStr, filename) {
+      const dlAnchorElem = document.getElementById('download-anchor');
+      dlAnchorElem.setAttribute("href", dataStr);
+      dlAnchorElem.setAttribute("download", filename);
+      dlAnchorElem.click();
+    }
+
+    // Initialize the app on load
+    window.onload = renderViews;
+  </script>
+</body>
+</html>
